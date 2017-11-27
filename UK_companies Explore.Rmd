@@ -1,0 +1,80 @@
+---
+title: "Tymill Interview"
+author: "Anthony Wang"
+date: "November 6, 2017"
+output: html_document
+---
+
+#0.Preparation
+```{r}
+library(ggplot2)
+library(plyr)
+setwd("C:/Users/Anthony Wang/Documents/MSIM/Career/Internship/Tyemill")
+company_uk<-read.csv("UK_companies.csv")
+company_uk$sic_code<-as.factor(company_uk$sic_code)
+company_uk<-as.data.frame(company_uk)
+summary(company_uk)
+
+```
+
+#1.Determine the viability to aggregate geographically and by sic_code. 
+
+*Since there is no dictionary for this dataset. All my analysis is based on my own understanding of the data header.
+
+*There are 4 geography related columns - reg_address_post_town, reg_address_county,reg_address_country, reg_address_post_code
+
+* 1.1 984 out of 999 reg_address_post_town are in London.
+* 1.2 936 missing value for reg_address_county
+* 1.3 535 missing value for reg_address_country and the rest are England, Great Britain and UK.
+* 1.4 No missing data in reg_post_code
+
+
+*Based on the analysis above. The best way to aggregate data is to use post code. We can also use post town, the only problem is that they are all in London.
+
+* 1.5 Only one NA in sic_code - standard industrial classification
+* 1.6 Using sic_code is doable because we only have 198 unique value and there are 15 groups that has data points more than 15.
+
+###For sic_code
+```{r}
+
+length(company_uk$reg_address_county[company_uk$reg_address_county==""])
+length(unique(company_uk$sic_code))
+
+count(company_uk$sic_code)[order(-count(company_uk$sic_code)$freq),][1:15,]
+
+
+
+```
+
+
+#2.Explain why you believe it will or will not work. 
+
+* 2.0 Depends on the granularity we care about
+
+* 2.1 It will work because as long as we have another dataset mapping post code and address/region, we can aggregate all companies geographically. Post code is a key column.
+
+* 2.2 For sic-code, as discussed above
+
+#3.List concerns or issues about this dataset.
+
+
+* 3.1 No dictionary
+
+* 3.2 Uncomfortable about the company name column - so many strange names starts with numbers - later cleaned
+
+* 3.3 post code is not cleaned -- could be used as the a good primary key to extract all location related information
+
+#4.If you make any attempts to cleanup this dataset, explain why and then how you did it.
+
+* 4.1. Using primary key company_number to complete company name (#NAMES - special puntuation)
+* 4.2  Cleanup post code then use it as the primary key for location information
+  + 4.2.1 I downloaded another dataset from internet mapping post code to location (county, region, country) (https://github.com/Gibbs/uk-postcodes/blob/master/postcodes.csv)
+
+
+#5.What columns seemed more useful than others?
+
+* 5.1 I like company_number, which is the primary key for the table
+* 5.2 Company name is important and is complete ater data cleaning
+* 5.3 Post code is the key to other location imformation
+* 5.4 All location related columns will be dependent on post code (64 missing for now)
+
